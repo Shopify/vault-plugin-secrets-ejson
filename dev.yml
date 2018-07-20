@@ -1,0 +1,24 @@
+name: vault-plugin-secrets-ejson
+display_name: "Vault Plugin: Secrets EJSON"
+
+up:
+  - go:
+      version: 1.10.3
+
+commands:
+  make:deps:
+      syntax: ""
+      desc: 'installs dependencies'
+      run: make deps
+  make:test:
+      syntax: ""
+      desc: 'run all of the tests'
+      run: make test
+  make:fmt:
+    syntax: ""
+    desc: 'runs `go fmt` command to clean up code formatting'
+    run: make fmt
+  make:build:
+    syntax: ""
+    desc: 'builds the vault-plugin-secrets-ejson binary'
+    run: make build
