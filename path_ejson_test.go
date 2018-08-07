@@ -139,11 +139,11 @@ func TestEJSON_Data_Delete(t *testing.T) {
 	}
 
 	respReadEnc, err := b.HandleRequest(context.Background(), reqReadEnc)
-	if err != nil || (respReadEnc != nil && respReadEnc.IsError()) {
+	if err != nil {
 		t.Fatalf("err:%s resp:%#v\n", err, respReadEnc)
 	}
 
-	if respReadEnc != nil {
+	if respReadEnc != nil && !respReadEnc.IsError() {
 		t.Fatalf("Read encrypted data that was supposed to be deleted: \n%#v", respReadEnc)
 	}
 
@@ -154,11 +154,11 @@ func TestEJSON_Data_Delete(t *testing.T) {
 	}
 
 	respReadDec, err := b.HandleRequest(context.Background(), reqReadDec)
-	if err != nil || (respReadDec != nil && respReadDec.IsError()) {
+	if err != nil {
 		t.Fatalf("err:%s resp:%#v\n", err, respReadDec)
 	}
 
-	if respReadDec != nil {
+	if respReadEnc != nil && !respReadEnc.IsError() {
 		t.Fatalf("Read decrypted data that was supposed to be deleted: \n%#v", respReadDec)
 	}
 }
