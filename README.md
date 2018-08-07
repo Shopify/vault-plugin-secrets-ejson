@@ -39,7 +39,7 @@ Success! Enabled the vault-plugin-secrets-ejson plugin at: ejson/
 
 ```bash
 # Storing the public/private key for decryption
-# This needs to be done first, and must be underneath keys/
+# This needs to be done first, and the secret must be underneath keys/
 $ vault write ejson/keys/15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56 private="37124bcf00c2d9fd87ddd596162d99c004460fd47130f2d653e45f85a0681cf0"
 Key        Value
 ---        -----
@@ -109,3 +109,11 @@ vault_generic_secret.example: Refreshing state... (ID: ejson/itsasecret)
 
 Apply complete! Resources: 0 added, 0 changed, 0 destroyed
 ```
+
+## Contributing
+
+See [CONTRIBUTING](./CONTRIBUTING.md).
+
+## License
+
+See [LICENSE](./LICENSE)

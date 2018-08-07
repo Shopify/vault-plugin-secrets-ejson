@@ -43,7 +43,7 @@ func (b *backend) ejsonRead(ctx context.Context, req *logical.Request, data *fra
 	}
 
 	if entry == nil {
-		return nil, nil
+		return logical.ErrorResponse(fmt.Sprintf("failed to find value at %s", req.Path)), nil
 	}
 
 	b.Logger().Info("reading value at", "path", req.Path)

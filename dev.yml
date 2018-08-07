@@ -1,3 +1,4 @@
+# Don't worry about this file if you're an external contributor
 name: vault-plugin-secrets-ejson
 display_name: "Vault Plugin: Secrets EJSON"
 
