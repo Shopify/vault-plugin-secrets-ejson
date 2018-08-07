@@ -1,5 +1,7 @@
 # Vault Plugin: EJSON Secrets Backend
 
+[![Build Status](https://travis-ci.com/Shopify/vault-plugin-secrets-ejson.svg?branch=master)](https://travis-ci.com/Shopify/vault-plugin-secrets-ejson)
+
 ## Summary
 
 A standalone backend plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit [EJSON](https://github.com/Shopify/ejson) to Vault wherein it will be decrypted and stored.
