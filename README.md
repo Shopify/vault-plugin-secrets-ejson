@@ -4,7 +4,7 @@
 
 ## Summary
 
-A standalone backend plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit [EJSON](https://github.com/Shopify/ejson) to Vault wherein it will be decrypted and stored.
+A secret plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit [EJSON](https://github.com/Shopify/ejson) to Vault wherein it will be decrypted and stored.
 
 ## Usage
 
@@ -13,12 +13,12 @@ A standalone backend plugin for use with [Hashicorp Vault](https://www.github.co
 ```bash
 # Generate a Vault config detailing where the plugin directory is located
 $ tee vault-config.hcl <<EOF
-plugin_directory = "/path/to/binary"
+plugin_directory = "/vault/plugins"
 EOF
 
 # Run Vault
 # NOTE: Do not run -dev in production
-$ vault server -dev -dev-root-token-id="root" -config=tmp/vault-config.hcl
+$ vault server -dev -dev-root-token-id="root" -config=vault-config.hcl
 
 # Export VAULT_ADDR for future `vault` commands
 $ export VAULT_ADDR='http://127.0.0.1:8200'
@@ -27,12 +27,12 @@ $ export VAULT_ADDR='http://127.0.0.1:8200'
 $ make build
 
 # Generate checksum, and tell Vault about the plugin
-$ SHASUM=$(shasum -a 256 "/path/to/binary/vault-plugin-secrets-ejson" | cut -d " " -f1)
-$ vault write sys/plugins/catalog/vault-plugin-secrets-ejson \
+$ SHASUM=$(shasum -a 256 "/vault/plugins/vault-plugin-secrets-ejson" | cut -d " " -f1)
+$ vault write sys/plugins/catalog/secret/vault-plugin-secrets-ejson \
   sha_256="$SHASUM" \
   command="vault-plugin-secrets-ejson"
 
-# Enable the plugin at a specific path
+# Enable the plugin at a specific path (in this case ejson/)
 $ vault secrets enable -path=ejson -plugin-name=vault-plugin-secrets-ejson plugin
 Success! Enabled the vault-plugin-secrets-ejson plugin at: ejson/
 ```
@@ -73,7 +73,7 @@ Key      Value
 ejson    map[anumber:1 asecret:ohai]
 ```
 
-This plugin can also be used with Terraform's `vault_generic_secret` resource to safely store secrets inside of Vault.
+This plugin can also be used with Terraform's `vault_generic_secret` resource to safely store version controlled secrets inside of Vault.
 
 ```bash
 $ cat main.tf
