@@ -8,7 +8,7 @@ package json
 // Just about at the limit of what is reasonable to write by hand.
 // Some parts are a bit tedious, but overall it nicely factors out the
 // otherwise common code from the multiple scanning functions
-// in this package (Compact, Indent, checkValid, nextValue, etc).
+// in this package (Compact, Indent, checkValid, NextValue, etc).
 //
 // This file starts with two simple examples using the scanner
 // before diving into the scanner itself.
@@ -22,11 +22,11 @@ func checkValid(data []byte, scan *Scanner) error {
 	for _, c := range data {
 		scan.bytes++
 		if scan.Step(scan, int(c)) == ScanError {
-			return scan.err
+			return scan.Err
 		}
 	}
 	if scan.EOF() == ScanError {
-		return scan.err
+		return scan.Err
 	}
 	return nil
 }
@@ -37,9 +37,9 @@ func Validate(data []byte) error {
 	return checkValid(data, s)
 }
 
-// nextValue splits data after the next whole JSON value,
+// NextValue splits data after the next whole JSON value,
 // returning that value and the bytes that follow it as separate slices.
-// scan is passed in for use by nextValue to avoid an allocation.
+// scan is passed in for use by NextValue to avoid an allocation.
 func NextValue(data []byte, scan *Scanner) (value, rest []byte, err error) {
 	scan.Reset()
 	for i, c := range data {
@@ -47,14 +47,14 @@ func NextValue(data []byte, scan *Scanner) (value, rest []byte, err error) {
 		if v >= ScanEnd {
 			switch v {
 			case ScanError:
-				return nil, nil, scan.err
+				return nil, nil, scan.Err
 			case ScanEnd:
 				return data[0:i], data[i:], nil
 			}
 		}
 	}
 	if scan.EOF() == ScanError {
-		return nil, nil, scan.err
+		return nil, nil, scan.Err
 	}
 	return data, nil, nil
 }
@@ -67,14 +67,14 @@ type SyntaxError struct {
 
 func (e *SyntaxError) Error() string { return e.msg }
 
-// A scanner is a JSON scanning state machine.
-// Callers call scan.reset() and then pass bytes in one at a time
-// by calling scan.step(&scan, c) for each byte.
+// A Scanner is a JSON scanning state machine.
+// Callers call scan.Reset() and then pass bytes in one at a time
+// by calling scan.Step(&scan, c) for each byte.
 // The return value, referred to as an opcode, tells the
 // caller about significant parsing events like beginning
 // and ending literals, objects, and arrays, so that the
 // caller can follow along if it wishes.
-// The return value scanEnd indicates that a single top-level
+// The return value ScanEnd indicates that a single top-level
 // JSON value has been completed, *before* the byte that
 // just got passed in.  (The indication must be delayed in order
 // to recognize the end of numbers: is 123 a whole value or
@@ -93,7 +93,7 @@ type Scanner struct {
 	parseState []int
 
 	// Error that happened, if any.
-	err error
+	Err error
 
 	// 1-byte redo (see undo method)
 	redo      bool
@@ -105,12 +105,12 @@ type Scanner struct {
 }
 
 // These values are returned by the state transition functions
-// assigned to scanner.state and the method scanner.eof.
+// assigned to Scanner.state and the method Scanner.EOF.
 // They give details about the current state of the scan that
 // callers might be interested to know about.
 // It is okay to ignore the return value of any particular
-// call to scanner.state: if one call returns scanError,
-// every subsequent call will return scanError too.
+// call to Scanner.state: if one call returns ScanError,
+// every subsequent call will return ScanError too.
 const (
 	// Continue.
 	ScanContinue     = iota // uninteresting byte
@@ -126,7 +126,7 @@ const (
 
 	// Stop.
 	ScanEnd   // top-level value ended *before* this byte; known to be first "stop" result
-	ScanError // hit an error, scanner.err.
+	ScanError // hit an error, Scanner.err.
 )
 
 // These values are stored in the parseState stack.
@@ -144,15 +144,15 @@ const (
 func (s *Scanner) Reset() {
 	s.Step = stateBeginValue
 	s.parseState = s.parseState[0:0]
-	s.err = nil
+	s.Err = nil
 	s.redo = false
 	s.endTop = false
 }
 
-// eof tells the scanner that the end of input has been reached.
+// EOF tells the scanner that the end of input has been reached.
 // It returns a scan status just as s.step does.
 func (s *Scanner) EOF() int {
-	if s.err != nil {
+	if s.Err != nil {
 		return ScanError
 	}
 	if s.endTop {
@@ -162,8 +162,8 @@ func (s *Scanner) EOF() int {
 	if s.endTop {
 		return ScanEnd
 	}
-	if s.err == nil {
-		s.err = &SyntaxError{"unexpected end of JSON input", s.bytes}
+	if s.Err == nil {
+		s.Err = &SyntaxError{"unexpected end of JSON input", s.bytes}
 	}
 	return ScanError
 }
@@ -396,7 +396,7 @@ func stateInStringEscU123(s *Scanner, c int) int {
 	return s.error(c, "in \\u hexadecimal character escape")
 }
 
-// stateInStringEscU123 is the state after reading `-` during a number.
+// stateNeg is the state after reading `-` during a number.
 func stateNeg(s *Scanner, c int) int {
 	if c == '0' {
 		s.Step = state0
@@ -590,7 +590,7 @@ func stateError(s *Scanner, c int) int {
 // error records an error and switches to the error state.
 func (s *Scanner) error(c int, context string) int {
 	s.Step = stateError
-	s.err = &SyntaxError{"invalid character " + quoteChar(c) + " " + context, s.bytes}
+	s.Err = &SyntaxError{"invalid character " + quoteChar(c) + " " + context, s.bytes}
 	return ScanError
 }
 
