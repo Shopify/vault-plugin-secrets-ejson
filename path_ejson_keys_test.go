@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/vault/logical"
+	"github.com/hashicorp/vault/sdk/logical"
 )
 
 func EJSON_Keys_Setup(t *testing.T, b logical.Backend, storage logical.Storage) {

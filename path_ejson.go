@@ -5,13 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/Shopify/ejson"
 	ej "github.com/Shopify/ejson/json"
 
 	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/vault/logical"
-	"github.com/hashicorp/vault/logical/framework"
+	"github.com/hashicorp/vault/sdk/framework"
+	"github.com/hashicorp/vault/sdk/logical"
 )
 
 func ejsonPaths(b *backend) []*framework.Path {
@@ -109,6 +110,14 @@ func (b *backend) ejsonCreateUpdate(ctx context.Context, req *logical.Request, d
 		return nil, err
 	}
 	delete(decData, "_public_key")
+
+	// Strip underscores from key values before storing it decrypted for ease-of-access
+	for k, v := range decData {
+		if strings.HasPrefix(k, "_") {
+			decData[strings.TrimPrefix(k, "_")] = v
+			delete(decData, k)
+		}
+	}
 
 	// Marshal the sanitized values one last time so we can store it
 	sanData, err := json.Marshal(decData)

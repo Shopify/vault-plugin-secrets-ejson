@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/hashicorp/vault/logical"
+	"github.com/hashicorp/vault/sdk/logical"
 )
 
 func TestEJSON_Data_Put(t *testing.T) {
@@ -13,10 +13,11 @@ func TestEJSON_Data_Put(t *testing.T) {
 
 	EJSON_Keys_Setup(t, b, storage)
 
-	data := map[string]interface{}{
+	dataInput := map[string]interface{}{
 		"ejson": map[string]interface{}{
 			"_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
 			"asecret":     "EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]",
+			"_bsecret":    "intentionally_left_unencrypted",
 			"anumber":     1,
 		},
 	}
@@ -25,7 +26,7 @@ func TestEJSON_Data_Put(t *testing.T) {
 		Operation: logical.CreateOperation,
 		Path:      "itsasecret",
 		Storage:   storage,
-		Data:      data,
+		Data:      dataInput,
 	}
 
 	resp, err := b.HandleRequest(context.Background(), req)
@@ -43,6 +44,7 @@ func TestEJSON_Data_Get(t *testing.T) {
 		"ejson": map[string]interface{}{
 			"_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
 			"asecret":     "EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]",
+			"_bsecret":    "intentionally_left_unencrypted",
 			"anumber":     float64(1),
 		},
 	}
@@ -88,6 +90,7 @@ func TestEJSON_Data_Get(t *testing.T) {
 	dataDec := map[string]interface{}{
 		"ejson": map[string]interface{}{
 			"asecret": "ohai",
+			"bsecret": "intentionally_left_unencrypted",
 			"anumber": float64(1),
 		},
 	}
