@@ -6,6 +6,8 @@
 
 A secret plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit [EJSON](https://github.com/Shopify/ejson) to Vault wherein it will be decrypted and stored.
 
+Any key values prefixed with an underscore will be stored with the underscore removed at the decrypted path (see below for an example). This is done intentionally to keep data access sane.
+
 ## Usage
 
 ### Installing
@@ -52,25 +54,26 @@ $ cat itsasecret.ejson
 {
   "_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
   "asecret": "EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]",
+  "_bsecret": "orly",
   "anumber": 1
 }
 
 $ vault write ejson/itsasecret @itsasecret.ejson
 Key      Value
 ---      -----
-ejson    map[asecret:EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=] _public_key:15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56 anumber:1]
+ejson    map[_bsecret:orly _public_key:15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56 anumber:1 asecret:EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]]
 
 # Encrypted payload, useful for safely comparing values with other tools (e.g. Terraform)
 $ vault read ejson/itsasecret
 Key      Value
 ---      -----
-ejson    map[asecret:EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=] _public_key:15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56 anumber:1]
+ejson    map[_bsecret:orly _public_key:15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56 anumber:1 asecret:EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]]
 
 # Decrypted payload, useful for consumption!
 $ vault read ejson/itsasecret/decrypted
 Key      Value
 ---      -----
-ejson    map[anumber:1 asecret:ohai]
+ejson    map[anumber:1 asecret:ohai bsecret:orly]
 ```
 
 This plugin can also be used with Terraform's `vault_generic_secret` resource to safely store version controlled secrets inside of Vault.
@@ -87,6 +90,7 @@ resource "vault_generic_secret" "example" {
   "ejson": {
     "_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
     "asecret": "EJ[1:sdseJpJ3BpP9PO5Qs8IB4urmmYil46edSTek8SjgVGA=:zl7mkBzL4g2d0PE3hPucmfbDjf3aDK7K:iryi3H7wRGWvUI8kjfWLtP3sFiw=]",
+    "_bsecret": "orly",
     "anumber": 1
   }
 }
@@ -97,7 +101,7 @@ EOT
 $ terraform apply -auto-approve
 vault_generic_secret.example: Refreshing state... (ID: ejson/itsasecret)
 vault_generic_secret.example: Creating...
-  data_json:    "" => "{\"ejson\":{\"_public_key\":\"15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56\",\"anumber\":1,\"database_password\":\"EJ[1:dPD6H7zfvJRwpJEIixW4HmZOSr+Mwi68Dtp0h+w5fAM=:lsAK/idjgbFagIWHIooBmVsTwFO1xr/1:cyzQwFGgAnMH24wVTwQKpSAw0V2vFQsD7x329g==]\",\"raptor\":\"EJ[1:VTS0QDPw4yD5324RDWWjD/m2rmgh5G+alvYTtb5jEjY=:BZso8xrFMssk/AuwfdjlQO/awyaB6E8D:mgT/mbESO2opyYAuK/buUe5XpHtu7MeLjLg=]\"}}"
+  data_json:    "" => "{\"ejson\":{\"_public_key\":\"15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56\",\"anumber\":1,\"asecret\":\"EJ[1:dPD6H7zfvJRwpJEIixW4HmZOSr+Mwi68Dtp0h+w5fAM=:lsAK/idjgbFagIWHIooBmVsTwFO1xr/1:cyzQwFGgAnMH24wVTwQKpSAw0V2vFQsD7x329g==]\",\"_bsecret\":\"orly\",\"anumber\":\"1\"}}"
   disable_read: "" => "false"
   path:         "" => "ejson/itsasecret"
 vault_generic_secret.example: Creation complete after 0s (ID: ejson/itsasecret)
