@@ -15,14 +15,13 @@ endif
 all: fmt test build
 
 build:
-	GOOS=$(OS) GOARCH="$(GOARCH)" go build -o vault-plugin-secrets-ejson cmd/vault-plugin-secrets-ejson/main.go
+	GOOS=$(OS) GOARCH="$(GOARCH)" go build -mod vendor -o vault-plugin-secrets-ejson cmd/vault-plugin-secrets-ejson/main.go
 
 clean:
 	rm -f ./vault-plugin-secrets-ejson
 
 deps:
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure
+	go mod tidy
 
 fmt:
 	go fmt $$(go list ./...)
