@@ -9,6 +9,7 @@ import (
 	"github.com/Shopify/ejson"
 	ej "github.com/Shopify/ejson/json"
 	"github.com/hashicorp/vault/sdk/logical"
+	"golang.org/x/crypto/scrypt"
 )
 
 func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []byte) (map[string]interface{}, error) {
@@ -48,4 +49,18 @@ func MarshalInput(inputData interface{}) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("data provided was in an unexpected format")
 	}
+}
+
+func HashPlaintext(plaintext []byte, salt []byte) ([]byte, error) {
+	return scrypt.Key(plaintext, salt, 1<<14, 8, 1, 32)
+}
+
+func (b *backend) IdentitySaltOrDefault(ctx context.Context, req *logical.Request) []byte {
+	// IMPROVEMENT: find something that works idenpendent of keys/
+	secretSalt, err := req.Storage.Get(ctx, "keys/__secret_salt")
+	if err != nil || secretSalt == nil {
+		b.Logger().Warn("No `secret_salt` set for ejson plaintext identity, using known insecure default!")
+		return []byte("ejson")
+	}
+	return secretSalt.Value
 }
