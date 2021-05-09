@@ -4,9 +4,9 @@
 
 ## Summary
 
-A secret plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit [EJSON](https://github.com/Shopify/ejson) to Vault wherein it will be decrypted and stored.
+A secret plugin for use with [Hashicorp Vault](https://www.github.com/hashicorp/vault). This plugin provides the ability to submit and manipulate [EJSON](https://github.com/Shopify/ejson) to Vault wherein it can be decrypted and/or stored.
 
-Any key values prefixed with an underscore will be stored with the underscore removed at the decrypted path (see below for an example). This is done intentionally to keep data access sane.
+Note: For storage operations, any key values prefixed with an underscore will be stored with the underscore removed at the decrypted path (see below for an example). This is done intentionally to keep data access sane.
 
 ## Usage
 
@@ -31,7 +31,9 @@ Success! Enabled the vault-plugin-secrets-ejson plugin at: ejson/
 ### Installing for production use
 Please consult official Vault documentation on how to checksum, load and enable plugins.
 
-### Demo
+## Demo
+
+### Storing public-private-keypairs (/keys/.*)
 
 ```bash
 # Storing the public/private key for decryption
@@ -40,8 +42,10 @@ $ vault write ejson/keys/15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfe
 Key        Value
 ---        -----
 private    37124bcf00c2d9fd87ddd596162d99c004460fd47130f2d653e45f85a0681cf0
+```
 
-
+### Storing ejson documents (/.*)
+```bash
 $ cat itsasecret.ejson
 {
   "_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
@@ -67,6 +71,31 @@ Key      Value
 ---      -----
 ejson    map[anumber:1 asecret:ohai bsecret:orly]
 ```
+
+### Decrypting an ejson document on the fly with EaaS (/decrypt)
+```bash
+$ vault write -format=json ejson/decrypt @itsasecret.ejson
+{
+  "request_id": "3df23dd2-7c41-3c3f-b5e4-d5300906bd78",
+  "lease_id": "",
+  "lease_duration": 0,
+  "renewable": false,
+  "data": {
+    "_bsecret": "orly",
+    "_public_key": "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
+    "anumber": 1,
+    "asecret": "to everyone",
+    "database": {
+      "_username": "admin",
+      "password": "sicher"
+    }
+  },
+  "warnings": null
+}
+```
+
+
+### Terraform integration
 
 This plugin can also be used with Terraform's `vault_generic_secret` resource to safely store version controlled secrets inside of Vault.
 
