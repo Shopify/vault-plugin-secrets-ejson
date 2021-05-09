@@ -10,34 +10,26 @@ Any key values prefixed with an underscore will be stored with the underscore re
 
 ## Usage
 
-### Installing
+### Installing for development use
 
 ```bash
-# Generate a Vault config detailing where the plugin directory is located
-$ tee vault-config.hcl <<EOF
-plugin_directory = "/vault/plugins"
-EOF
+# Build the binary
+$ make build
 
 # Run Vault
 # NOTE: Do not run -dev in production
-$ vault server -dev -dev-root-token-id="root" -config=vault-config.hcl
+$ vault server -dev -dev-root-token-id=root -dev-plugin-dir=./vault/plugins
 
 # Export VAULT_ADDR for future `vault` commands
 $ export VAULT_ADDR='http://127.0.0.1:8200'
 
-# Build the binary
-$ make build
-
-# Generate checksum, and tell Vault about the plugin
-$ SHASUM=$(shasum -a 256 "/vault/plugins/vault-plugin-secrets-ejson" | cut -d " " -f1)
-$ vault write sys/plugins/catalog/secret/vault-plugin-secrets-ejson \
-  sha_256="$SHASUM" \
-  command="vault-plugin-secrets-ejson"
-
 # Enable the plugin at a specific path (in this case ejson/)
-$ vault secrets enable -path=ejson -plugin-name=vault-plugin-secrets-ejson plugin
+$ vault secrets enable -path=ejson secrets-ejson
 Success! Enabled the vault-plugin-secrets-ejson plugin at: ejson/
 ```
+
+### Installing for production use
+Please consult official Vault documentation on how to checksum, load and enable plugins.
 
 ### Demo
 

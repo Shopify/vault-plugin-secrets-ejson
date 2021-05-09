@@ -1,2 +1,3 @@
 .DS_Store
 vault-plugin-secrets-ejson
+vault/plugins
