@@ -37,8 +37,11 @@ func DecryptEjson(ctx context.Context, encData []byte, storage logical.Storage) 
 
 	// Find the matching public key in keys/
 	keyPair, err := storage.Get(ctx, fmt.Sprintf("keys/%x", pubKey))
-	if err != nil || keyPair == nil {
+	if err != nil {
 		return nil, fmt.Errorf("failed to find public key in keys/: %s", err)
+	}
+	if keyPair == nil {
+		return nil, fmt.Errorf("failed to find key in keys/%x", pubKey)
 	}
 
 	if err := ejson.Decrypt(bytes.NewBuffer(encData), &out, "", string(keyPair.Value)); err != nil {
