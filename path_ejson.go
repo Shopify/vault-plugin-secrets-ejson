@@ -1,14 +1,10 @@
 package secretsejson
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/Shopify/ejson"
-	ej "github.com/Shopify/ejson/json"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
@@ -66,11 +62,6 @@ func (b *backend) ejsonRead(ctx context.Context, req *logical.Request, data *fra
 }
 
 func (b *backend) ejsonCreateUpdate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
-	var inputData interface{}
-	var encData []byte
-	var out bytes.Buffer
-	var err error
-
 	inputData, ok := data.GetOk("ejson")
 	if !ok {
 		if len(data.Raw) == 0 {
@@ -79,36 +70,16 @@ func (b *backend) ejsonCreateUpdate(ctx context.Context, req *logical.Request, d
 		inputData = data.Raw
 	}
 
-	switch value := inputData.(type) {
-	case map[string]interface{}:
-		encData, err = json.Marshal(value)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return logical.ErrorResponse("data provided was in an unexpected format"), logical.ErrInvalidRequest
-	}
-
-	pubKey, err := ej.ExtractPublicKey(encData)
+	encData, err := MarshalInput(inputData)
 	if err != nil {
-		return nil, errwrap.Wrapf("failed to extract public key: {{err}}", err)
+		return nil, errwrap.Wrapf("failed to marshall json: {{err}}", err)
 	}
 
-	// Find the matching public key in keys/
-	keyPair, err := req.Storage.Get(ctx, fmt.Sprintf("keys/%x", pubKey))
+	decData, err := DecryptEjsonDocument(ctx, req, encData)
 	if err != nil {
-		return nil, errwrap.Wrapf("failed to find public key in keys/: {{err}}", err)
-	}
-
-	if err := ejson.Decrypt(bytes.NewBuffer(encData), &out, "", string(keyPair.Value)); err != nil {
 		return nil, errwrap.Wrapf("failed to decrypt ejson: {{err}}", err)
 	}
-
 	// Remove the _public_key key so it doesn't end up as a value
-	decData := map[string]interface{}{}
-	if err := json.Unmarshal(out.Bytes(), &decData); err != nil {
-		return nil, err
-	}
 	delete(decData, "_public_key")
 
 	// Strip underscores from key values before storing it decrypted for ease-of-access
