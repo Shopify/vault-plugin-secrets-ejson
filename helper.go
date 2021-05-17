@@ -13,6 +13,20 @@ import (
 )
 
 func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []byte) (map[string]interface{}, error) {
+
+	decBytes, err := DecryptEjson(ctx, encData, req.Storage)
+	if err != nil {
+		return nil, err
+	}
+	decData := map[string]interface{}{}
+	if err := json.Unmarshal(decBytes, &decData); err != nil {
+		return nil, err
+	}
+
+	return decData, nil
+}
+
+func DecryptEjson(ctx context.Context, encData []byte, storage logical.Storage) ([]byte, error) {
 	var out bytes.Buffer
 	var err error
 
@@ -22,33 +36,35 @@ func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []b
 	}
 
 	// Find the matching public key in keys/
-	keyPair, err := req.Storage.Get(ctx, fmt.Sprintf("keys/%x", pubKey))
+	keyPair, err := storage.Get(ctx, fmt.Sprintf("keys/%x", pubKey))
 	if err != nil {
 		return nil, fmt.Errorf("failed to find public key in keys/: %s", err)
+	}
+	if keyPair == nil {
+		return nil, fmt.Errorf("failed to find key in keys/%x", pubKey)
 	}
 
 	if err := ejson.Decrypt(bytes.NewBuffer(encData), &out, "", string(keyPair.Value)); err != nil {
 		return nil, fmt.Errorf("failed to decrypt ejson: %s", err)
 	}
-	decData := map[string]interface{}{}
-	if err := json.Unmarshal(out.Bytes(), &decData); err != nil {
-		return nil, err
-	}
-
-	return decData, nil
+	return out.Bytes(), nil
 }
 
 func MarshalInput(inputData interface{}) ([]byte, error) {
 	switch value := inputData.(type) {
 	case map[string]interface{}:
-		encData, err := json.Marshal(value)
-		if err != nil {
-			return nil, err
-		}
-		return encData, nil
+		return MarshalForEjson(value)
 	default:
 		return nil, fmt.Errorf("data provided was in an unexpected format")
 	}
+}
+
+func MarshalForEjson(input map[string]interface{}) ([]byte, error) {
+	bytes, err := json.Marshal(input)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }
 
 func HashPlaintext(plaintext []byte, salt []byte) ([]byte, error) {
