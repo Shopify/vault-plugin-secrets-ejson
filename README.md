@@ -94,6 +94,23 @@ $ vault write -format=json ejson/decrypt @itsasecret.ejson
 }
 ```
 
+### Uniquely identify a plain text secret (/identity)
+To help with identifying secrets across multiple ejson documents, this EaaS function can be used to generate a unique string for any given plain text.
+```bash
+# This needs to be done first, and the secret salt must be underneath keys/
+# If not set however, a default value will be used. This is considered less secure, especially if applied
+# to low entropy plain text.
+$ vault write ejson/keys/__secret_salt private="SOME_LONG_AND_RANDOM_STRING_THAT_SHOULD_BE_KEPT_SECRET"
+Key        Value
+---        -----
+private    SOME_LONG_AND_RANDOM_STRING_THAT_SHOULD_BE_KEPT_SECRET
+
+$ vault write ejson/identity plaintext="p4ssw0rd"
+Key         Value
+---         -----
+identity    1ab30335c71ede6e08ef18f6ee68ad2e893edd3eb12a5629b899be9149777ee1
+```
+
 
 ### Terraform integration
 
