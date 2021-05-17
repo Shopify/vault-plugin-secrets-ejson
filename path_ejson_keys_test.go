@@ -81,6 +81,21 @@ func TestEJSON_Keys_Data_List(t *testing.T) {
 
 	EJSON_Keys_Setup(t, b, storage)
 
+	respList, err := listKeys(b, storage)
+	if err != nil {
+		t.Fatalf("Could not list keys: %#v", err)
+	}
+
+	dataList := []string{
+		"15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
+	}
+
+	if !reflect.DeepEqual(respList, dataList) {
+		t.Fatalf("Bad list response: \nGot: %#v\nWant: %#v", respList, dataList)
+	}
+}
+
+func listKeys(b logical.Backend, storage logical.Storage) ([]string, error) {
 	reqList := &logical.Request{
 		Operation: logical.ListOperation,
 		Path:      "keys/",
@@ -89,14 +104,39 @@ func TestEJSON_Keys_Data_List(t *testing.T) {
 
 	respList, err := b.HandleRequest(context.Background(), reqList)
 	if err != nil || (respList != nil && respList.IsError()) {
+		return nil, err
+	}
+	keys := respList.Data["keys"].([]string)
+
+	return keys, nil
+}
+
+func TestEJSON_KeyPairCreate(t *testing.T) {
+	b, storage := getTestBackend(t)
+
+	EJSON_Keys_Setup(t, b, storage)
+
+	keys, err := listKeys(b, storage)
+	if err != nil {
+		t.Fatalf("Could not list keys: %#v", err)
+	}
+	numberOfKeys := len(keys)
+
+	reqList := &logical.Request{
+		Operation: logical.CreateOperation,
+		Path:      "keypair",
+		Storage:   storage,
+	}
+	respList, err := b.HandleRequest(context.Background(), reqList)
+	if err != nil || (respList != nil && respList.IsError()) {
 		t.Fatalf("err:%s resp:%#v\n", err, respList)
 	}
 
-	dataList := []string{
-		"15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
+	keys, err = listKeys(b, storage)
+	if err != nil {
+		t.Fatalf("Could not list keys: %#v", err)
 	}
-
-	if !reflect.DeepEqual(respList.Data["keys"], dataList) {
-		t.Fatalf("Bad list response: \nGot: %#v\nWant: %#v", respList.Data["keys"], dataList)
+	if len(keys) != (numberOfKeys + 1) {
+		t.Fatalf("write /keypair Did not add one new key to keys/")
 	}
 }

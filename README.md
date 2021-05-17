@@ -33,6 +33,26 @@ Please consult official Vault documentation on how to checksum, load and enable 
 
 ## Demo
 
+
+### Generating public-private-keypairs (/keypair)
+
+```bash
+$ vault write -force ejson/keypair
+Key       Value
+---       -----
+public    7f0510f044e9ae852f8ae2865cce55ae01f3b9c0f505b1b33b6323579b778a30
+
+$ vault list ejson/keys
+Keys
+----
+7f0510f044e9ae852f8ae2865cce55ae01f3b9c0f505b1b33b6323579b778a30
+
+$ vault read ejson/keys/7f0510f044e9ae852f8ae2865cce55ae01f3b9c0f505b1b33b6323579b778a30
+Key        Value
+---        -----
+private    1430dc364475c63e21cc549ad74245970bfa70b98b9497e7f3c71dd3ce7cb13c
+```
+
 ### Storing public-private-keypairs (/keys/.*)
 
 ```bash

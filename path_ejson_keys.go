@@ -2,7 +2,9 @@ package secretsejson
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/Shopify/ejson"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/vault/sdk/framework"
 	"github.com/hashicorp/vault/sdk/logical"
@@ -10,7 +12,7 @@ import (
 
 func ejsonKeysPaths(b *backend) []*framework.Path {
 	return []*framework.Path{
-		&framework.Path{
+		{
 			Pattern: "keys/.*",
 			Fields: map[string]*framework.FieldSchema{
 				"public": &framework.FieldSchema{
@@ -29,6 +31,13 @@ func ejsonKeysPaths(b *backend) []*framework.Path {
 				logical.UpdateOperation: b.keyCreateUpdate,
 				logical.DeleteOperation: b.keyDelete,
 				logical.ListOperation:   b.keyList,
+			},
+		},
+		{
+			Pattern: "keypair",
+			Callbacks: map[logical.Operation]framework.OperationFunc{
+				logical.CreateOperation: b.keyPairCreate,
+				logical.UpdateOperation: b.keyPairCreate,
 			},
 		},
 	}
@@ -101,4 +110,26 @@ func (b *backend) keyList(ctx context.Context, req *logical.Request, data *frame
 		return nil, err
 	}
 	return logical.ListResponse(vals), nil
+}
+
+func (b *backend) keyPairCreate(ctx context.Context, req *logical.Request, data *framework.FieldData) (*logical.Response, error) {
+	public, private, err := ejson.GenerateKeypair()
+	if err != nil {
+		return nil, errwrap.Wrapf("failed to generate keypair ejson: {{err}}", err)
+	}
+	path := fmt.Sprintf("keys/%s", public)
+	b.Logger().Info(fmt.Sprintf("New key pair at %s", path))
+	entry := &logical.StorageEntry{
+		Key:   path,
+		Value: []byte(private),
+	}
+	if err := req.Storage.Put(ctx, entry); err != nil {
+		return nil, err
+	}
+
+	return &logical.Response{
+		Data: map[string]interface{}{
+			"public": public,
+		},
+	}, nil
 }
