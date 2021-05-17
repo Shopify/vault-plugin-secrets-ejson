@@ -17,7 +17,7 @@ func TestEJSON_Identity_default(t *testing.T) {
 	}
 
 	req := &logical.Request{
-		Operation: logical.ReadOperation,
+		Operation: logical.CreateOperation,
 		Path:      "identity",
 		Storage:   storage,
 		Data:      dataInput,
@@ -63,7 +63,7 @@ func TestEJSON_Identity_non_default(t *testing.T) {
 	}
 
 	req = &logical.Request{
-		Operation: logical.ReadOperation,
+		Operation: logical.CreateOperation,
 		Path:      "identity",
 		Storage:   storage,
 		Data:      dataInput,

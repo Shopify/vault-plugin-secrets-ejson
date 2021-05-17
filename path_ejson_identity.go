@@ -21,7 +21,8 @@ func ejsonIdentityPath(b *backend) []*framework.Path {
 			},
 			ExistenceCheck: b.pathExistenceCheck,
 			Callbacks: map[logical.Operation]framework.OperationFunc{
-				logical.ReadOperation: b.HashPlaintext,
+				logical.CreateOperation: b.HashPlaintext,
+				logical.UpdateOperation: b.HashPlaintext,
 			},
 		},
 	}
