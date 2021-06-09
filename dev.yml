@@ -4,7 +4,7 @@ display_name: "Vault Plugin: Secrets EJSON"
 
 up:
   - go:
-      version: 1.13.5
+      version: 1.16
 
 commands:
   make:deps:

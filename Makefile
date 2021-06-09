@@ -15,7 +15,7 @@ endif
 all: fmt test build
 
 build:
-	GOOS=$(OS) GOARCH="$(GOARCH)" go build -mod vendor -o vault/plugins/secrets-ejson cmd/vault-plugin-secrets-ejson/main.go
+	GOOS=$(OS) GOARCH="$(GOARCH)" go build -trimpath -ldflags "-s -w" -o vault/plugins/secrets-ejson cmd/vault-plugin-secrets-ejson/main.go
 
 clean:
 	rm -f ./vault-plugin-secrets-ejson
