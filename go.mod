@@ -1,11 +1,10 @@
 module github.com/Shopify/vault-plugin-secrets-ejson
 
-go 1.13
+go 1.16
 
 require (
-	github.com/Shopify/ejson v1.2.1
+	github.com/Shopify/ejson v1.2.2
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/fatih/color v1.8.0 // indirect
 	github.com/frankban/quicktest v1.7.2 // indirect
 	github.com/go-test/deep v1.0.4 // indirect
@@ -18,7 +17,6 @@ require (
 	github.com/hashicorp/vault/sdk v0.1.14-0.20191218020134-06959d23b502
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/pierrec/lz4 v2.4.0+incompatible // indirect
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
 )

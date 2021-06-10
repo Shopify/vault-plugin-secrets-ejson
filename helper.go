@@ -12,8 +12,26 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []byte) (map[string]interface{}, error) {
+func EncryptEjsonDocument(ctx context.Context, decData map[string]interface{}) (map[string]interface{}, error) {
+	decBytes, err := MarshalForEjson(decData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal json: %s", err)
+	}
 
+	encBytes, err := EncryptEjson(ctx, decBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	encData := map[string]interface{}{}
+	if err := json.Unmarshal(encBytes, &encData); err != nil {
+		return nil, err
+	}
+
+	return encData, nil
+}
+
+func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []byte) (map[string]interface{}, error) {
 	decBytes, err := DecryptEjson(ctx, encData, req.Storage)
 	if err != nil {
 		return nil, err
@@ -24,6 +42,17 @@ func DecryptEjsonDocument(ctx context.Context, req *logical.Request, encData []b
 	}
 
 	return decData, nil
+}
+
+func EncryptEjson(ctx context.Context, decData []byte) ([]byte, error) {
+	var out bytes.Buffer
+
+	_, err := ejson.Encrypt(bytes.NewReader(decData), &out)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encrypt ejson: %s", err)
+	}
+
+	return out.Bytes(), nil
 }
 
 func DecryptEjson(ctx context.Context, encData []byte, storage logical.Storage) ([]byte, error) {
@@ -54,6 +83,14 @@ func MarshalInput(inputData interface{}) ([]byte, error) {
 	switch value := inputData.(type) {
 	case map[string]interface{}:
 		return MarshalForEjson(value)
+	case string:
+		d := map[string]interface{}{}
+		err := json.Unmarshal([]byte(value), &d)
+		if err != nil {
+			return nil, err
+		}
+
+		return MarshalForEjson(d)
 	default:
 		return nil, fmt.Errorf("data provided was in an unexpected format")
 	}
