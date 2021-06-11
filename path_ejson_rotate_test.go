@@ -43,6 +43,20 @@ func TestEJSON_Keys_Rotate_InlineDoc(t *testing.T) {
 		t.Fatalf("public keys did not change: \nPublicKey: %#v\n", rotatedDoc[ej.PublicKeyField])
 	}
 
+	_, ok = respRead.Data["new_public_key"].(string)
+	if !ok {
+		t.Fatal("\"new_public_key\" missing from response", respRead)
+	}
+
+	_, ok = respRead.Data["old_public_key"].(string)
+	if !ok {
+		t.Fatal("\"old_public_key\" missing from response", respRead)
+	}
+
+	if !reflect.DeepEqual(rotatedDoc[ej.PublicKeyField], respRead.Data["new_public_key"]) {
+		t.Fatalf("public key in the document does not match new_public_key in the response")
+	}
+
 	publicKeys, err := storage.List(context.Background(), "keys/")
 	if err != nil {
 		t.Fatal(err)
@@ -93,6 +107,20 @@ func TestEJSON_Keys_Rotate_ExplicitDoc(t *testing.T) {
 
 	if reflect.DeepEqual(rotatedDoc[ej.PublicKeyField], publicKey) {
 		t.Fatalf("public keys did not change: \nPublicKey: %#v\n", rotatedDoc[ej.PublicKeyField])
+	}
+
+	_, ok = respRead.Data["new_public_key"].(string)
+	if !ok {
+		t.Fatal("\"new_public_key\" missing from response", respRead)
+	}
+
+	_, ok = respRead.Data["old_public_key"].(string)
+	if !ok {
+		t.Fatal("\"old_public_key\" missing from response", respRead)
+	}
+
+	if !reflect.DeepEqual(rotatedDoc[ej.PublicKeyField], respRead.Data["new_public_key"]) {
+		t.Fatalf("public key in the document does not match new_public_key in the response")
 	}
 
 	publicKeys, err := storage.List(context.Background(), "keys/")

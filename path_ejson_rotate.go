@@ -64,6 +64,7 @@ func (b *backend) rotate(ctx context.Context, req *logical.Request, data *framew
 		return nil, err
 	}
 
+	oldPublicKey := decDoc[ej.PublicKeyField].(string)
 	decDoc[ej.PublicKeyField] = public
 
 	encDoc, err := EncryptEjsonDocument(ctx, decDoc)
@@ -73,7 +74,9 @@ func (b *backend) rotate(ctx context.Context, req *logical.Request, data *framew
 
 	return &logical.Response{
 		Data: map[string]interface{}{
-			"document": encDoc,
+			"old_public_key": oldPublicKey,
+			"new_public_key": public,
+			"document":       encDoc,
 		},
 	}, nil
 }
