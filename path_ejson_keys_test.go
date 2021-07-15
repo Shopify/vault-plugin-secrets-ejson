@@ -2,6 +2,7 @@ package secretsejson
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -9,21 +10,29 @@ import (
 )
 
 func EJSON_Keys_Setup(t *testing.T, b logical.Backend, storage logical.Storage) {
-	dataInput := map[string]interface{}{
-		"public":  "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
-		"private": "37124bcf00c2d9fd87ddd596162d99c004460fd47130f2d653e45f85a0681cf0",
+	dataInputs := []map[string]interface{}{
+		{
+			"public":  "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
+			"private": "37124bcf00c2d9fd87ddd596162d99c004460fd47130f2d653e45f85a0681cf0",
+		},
+		{
+			"public":  "65f9592efefdf0e98df1c9e9b0742ff974705db8921e8a2da5810623f2c83851",
+			"private": "0fc1860a58f54e356d2f03174df064400c99d261695ddd78df9d2c00fcb42173",
+		},
 	}
 
-	reqKP := &logical.Request{
-		Operation: logical.CreateOperation,
-		Path:      "keys/15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
-		Storage:   storage,
-		Data:      dataInput,
-	}
+	for _, dataInput := range dataInputs {
+		reqKP := &logical.Request{
+			Operation: logical.CreateOperation,
+			Path:      fmt.Sprintf("keys/%s", dataInput["public"]),
+			Storage:   storage,
+			Data:      dataInput,
+		}
 
-	respKP, err := b.HandleRequest(context.Background(), reqKP)
-	if err != nil || (respKP != nil && respKP.IsError()) {
-		t.Fatalf("err:%s resp:%#v\n", err, respKP)
+		respKP, err := b.HandleRequest(context.Background(), reqKP)
+		if err != nil || (respKP != nil && respKP.IsError()) {
+			t.Fatalf("err:%s resp:%#v\n", err, respKP)
+		}
 	}
 }
 
@@ -88,6 +97,7 @@ func TestEJSON_Keys_Data_List(t *testing.T) {
 
 	dataList := []string{
 		"15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56",
+		"65f9592efefdf0e98df1c9e9b0742ff974705db8921e8a2da5810623f2c83851",
 	}
 
 	if !reflect.DeepEqual(respList, dataList) {

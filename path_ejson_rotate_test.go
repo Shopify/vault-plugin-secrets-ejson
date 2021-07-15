@@ -48,7 +48,7 @@ func TestEJSON_Keys_Rotate_InlineDoc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(publicKeys) != 2 {
+	if len(publicKeys) != 3 {
 		t.Fatalf("keypairs for the rotated document missing from storage")
 	}
 }
@@ -100,7 +100,7 @@ func TestEJSON_Keys_Rotate_ExplicitDoc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(publicKeys) != 2 {
+	if len(publicKeys) != 3 {
 		t.Fatalf("keypairs for the rotated document missing from storage")
 	}
 }
