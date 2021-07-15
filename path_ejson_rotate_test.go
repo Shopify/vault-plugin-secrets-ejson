@@ -13,6 +13,11 @@ import (
 func TestEJSON_Keys_Rotate_InlineDoc(t *testing.T) {
 	b, storage := getTestBackend(t)
 	EJSON_Keys_Setup(t, b, storage)
+	publicKeys, err := storage.List(context.Background(), "keys/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	inititialKeyCount := len(publicKeys)
 
 	publicKey := "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56"
 	dataInput := map[string]interface{}{
@@ -43,12 +48,12 @@ func TestEJSON_Keys_Rotate_InlineDoc(t *testing.T) {
 		t.Fatalf("public keys did not change: \nPublicKey: %#v\n", rotatedDoc[ej.PublicKeyField])
 	}
 
-	publicKeys, err := storage.List(context.Background(), "keys/")
+	publicKeys, err = storage.List(context.Background(), "keys/")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(publicKeys) != 2 {
+	if inititialKeyCount >= len(publicKeys) {
 		t.Fatalf("keypairs for the rotated document missing from storage")
 	}
 }
@@ -56,6 +61,11 @@ func TestEJSON_Keys_Rotate_InlineDoc(t *testing.T) {
 func TestEJSON_Keys_Rotate_ExplicitDoc(t *testing.T) {
 	b, storage := getTestBackend(t)
 	EJSON_Keys_Setup(t, b, storage)
+	publicKeys, err := storage.List(context.Background(), "keys/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	inititialKeyCount := len(publicKeys)
 
 	publicKey := "15838c2f3260185ad2a8e1298bd507479ff2470b9e9c1fd89e0fdfefe2959f56"
 	ejsonDoc := map[string]interface{}{
@@ -95,12 +105,12 @@ func TestEJSON_Keys_Rotate_ExplicitDoc(t *testing.T) {
 		t.Fatalf("public keys did not change: \nPublicKey: %#v\n", rotatedDoc[ej.PublicKeyField])
 	}
 
-	publicKeys, err := storage.List(context.Background(), "keys/")
+	publicKeys, err = storage.List(context.Background(), "keys/")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if len(publicKeys) != 2 {
+	if inititialKeyCount >= len(publicKeys) {
 		t.Fatalf("keypairs for the rotated document missing from storage")
 	}
 }

@@ -36,6 +36,7 @@ func Backend() *backend {
 		Help: "",
 		Paths: framework.PathAppend(
 			ejsonRotatePaths(&b),
+			ejsonCopyPaths(&b),
 			ejsonAnalysePaths(&b),
 			ejsonIdentityPath(&b),
 			ejsonDecryptPaths(&b),
