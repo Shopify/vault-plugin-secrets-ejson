@@ -25,6 +25,7 @@ func ejsonCopyPaths(b *backend) []*framework.Path {
 				},
 			},
 			Callbacks: map[logical.Operation]framework.OperationFunc{
+				logical.CreateOperation: b.copy,
 				logical.UpdateOperation: b.copy,
 			},
 		},
