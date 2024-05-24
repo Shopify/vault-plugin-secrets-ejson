@@ -1,5 +1,7 @@
 # Vault Plugin: EJSON Secrets Backend
 
+**NOTE: This project is not longer maintained.**
+
 [![Build Status](https://travis-ci.com/Shopify/vault-plugin-secrets-ejson.svg?branch=master)](https://travis-ci.com/Shopify/vault-plugin-secrets-ejson)
 
 ## Summary
