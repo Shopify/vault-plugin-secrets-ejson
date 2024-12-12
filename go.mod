@@ -17,6 +17,6 @@ require (
 	github.com/hashicorp/vault/sdk v0.1.14-0.20191218020134-06959d23b502
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/pierrec/lz4 v2.4.0+incompatible // indirect
-	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
+	golang.org/x/crypto v0.17.0
 	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
 )
